@@ -2,15 +2,16 @@ import sys
 import numpy as np
 import pandas as pd
 from datasets import Dataset, DatasetDict
-
+import librosa
 MULTIMODAL_SDK_PATH = "/home/dstratton/PycharmProjects/InterpretableMultimodal/CMU-MultimodalSDK"
 sys.path.append(MULTIMODAL_SDK_PATH)
 import mmsdk
 from mmsdk import mmdatasdk as md
-
+import re
+import torch
 
 # loads the dataset in the form from the datasets library
-def load_dataset(sequences_to_load):
+def load_mosi(sequences_to_load, load_audio=False):
     DATASET = md.cmu_mosi
     DATA_PATH = "cmumosi"
 
@@ -78,8 +79,41 @@ def load_dataset(sequences_to_load):
 
             df['text'] = sentences
 
+        ### audio
+        # https://huggingface.co/docs/datasets/audio_process.html
+        if load_audio:
+            ind = 0
+            df['file'] = ""
+            df['audio'] = None
+            for video_id in segment_ids_for_split:
+                vid_name = video_id.split('[')[0]
+                vid_index = int(re.match(r".*\[(\d+)\].*", video_id).group(1))
+                actual_file_name = f"cmumosi/Raw/Audio/WAV_16000/Segmented/{vid_name}_{vid_index+1}.wav"
+                s, r = librosa.load(actual_file_name, sr=16000)
+                # tens = torch.Tensor(s).cuda()
+                df['file'][ind] = actual_file_name
+                df['audio'][ind] = {'array': s, 'sampling_rate': r, 'path': actual_file_name}
+                ind += 1
+                pass
+
         # semi-slow solution but meh
         if 'CMU_MOSI_Visual_Facet_41' in sequences_to_load:
+            feature_names = dataset['CMU_MOSI_Visual_Facet_41'].metadata['dimension names']
+            all_features = []
+            for video_id in segment_ids_for_split:
+                features = []
+                for feat in dataset['CMU_MOSI_Visual_Facet_41'][video_id]['features']:
+                    features.append(feat)
+                all_features.append(pd.DataFrame(features, columns=feature_names))
+
+            for name in feature_names:
+                # todo: idk, dimensions too high
+                # currently just taking the mean i guess
+                df[name] = [x[name].mean() for x in all_features]
+            pass
+
+        # attempt2
+        if 'CMU_MOSI_Visual_Facet_41-v2' in sequences_to_load:
             feature_names = dataset['CMU_MOSI_Visual_Facet_41'].metadata['dimension names']
             all_features = []
             for video_id in segment_ids_for_split:
