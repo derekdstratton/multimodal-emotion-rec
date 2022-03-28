@@ -1,13 +1,15 @@
+# Multimodal Emotion Recognition 
 
+Derek Stratton
 
-### TODO
+Emily Hand
 
-1. Create a text-only classifier for MOSI based on a pre-trained transformer (record test results)
-2. Get shap values, you should be able to plot them by word, or also by time segment, for a sample
-3. Try creating a classifier trained on the training data (record results like above)
+This repo contains a bunch of scripts for training emotion recognition models in the
+text, audio, and visual modalities. The two datasets experimented on are [IEMOCAP](https://sail.usc.edu/iemocap/) and
+[CMU MOSI](http://multicomp.cs.cmu.edu/resources/cmu-mosi-dataset/). IEMOCAP can be
+requested for research use and CMU MOSI is publicly available, but they are needed to
+run their respective experiments.
 
-specifically look for examples that classifiers do poorly on, and if they
-benefit from modes. can look at shap vals on these
-
-id like to make a helper where i can give a video id
-and segment and it retrieves the original video to play.
+For reading in the datasets, I use the [CMU Multimodal SDK](https://github.com/A2Zadeh/CMU-MultimodalSDK)
+and [torchemotion](https://github.com/alanwuha/torchemotion). I changed some parts of
+torchemotion to suit my needs, which is why it's in this repo.
