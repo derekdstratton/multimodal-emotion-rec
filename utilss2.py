@@ -129,7 +129,7 @@ def load_mosi(sequences_to_load, load_audio=False):
                 df[name] = [x[name].mean() for x in all_features]
             pass
 
-        # df = df[df["duration"] < 10] # only less than 10 second clips
+        df = df[df["duration"] < 10] # only less than 10 second clips
         data_dict[split_name] = Dataset.from_pandas(df)
 
     return DatasetDict(data_dict)
